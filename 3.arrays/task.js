@@ -1,3 +1,4 @@
+"use strict"
 function compareArrays(arr1, arr2) {
     let result = arr1.every(function(element,index){
     return (arr1.length === arr2.length && element===arr2[index]);

@@ -76,11 +76,19 @@ function makeWork (arrOfArr, func) {
     let element = arrOfArr[index];
       for (let i = 0; i < element.length; i++) {
         let element2 = element[i];
+<<<<<<< HEAD
 
         // console.log("element.length = "+ element.length);
 
       }
 
+=======
+
+        // console.log("element.length = "+ element.length);
+
+      }
+
+>>>>>>> 225e634de8ffc9ae1b58bff76b4016f47354147f
       maxWorkerResult1 = func(...element)
       if (maxWorkerResult <  maxWorkerResult1) {
         maxWorkerResult =  maxWorkerResult1;
@@ -89,4 +97,8 @@ function makeWork (arrOfArr, func) {
     //   console.log("element "+[index]+" = "+ maxWorkerResult);
   }
   return maxWorkerResult;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 225e634de8ffc9ae1b58bff76b4016f47354147f
