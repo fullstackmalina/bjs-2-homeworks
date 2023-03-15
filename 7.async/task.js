@@ -1,72 +1,94 @@
 class AlarmClock {
     constructor() {
         this.alarmCollection = [];
-        this.intervalId = null;
+        this.timerId = null;
     }
-
-    addClock(time, callback) {
-        if (!time || !callback) {
-            throw new Error('Отсутствуют обязательные аргументы');
+    addClock(time, callback, id) {
+        if (id === undefined) {
+            throw new Error('error text');
         }
-        if (this.alarmCollection.find(alarm => alarm.time === time)) {
-            console.warn('Уже присутствует звонок на это же время');
+        if (this.alarmCollection.some(alarm => alarm.id === id)) {
+            console.error("Звонок с таким id уже существует!");
             return;
         }
-        this.alarmCollection.push({
-            time,
-            callback,
-            canCall: true
+        this.alarmCollection.push({ time, callback, id });
+    }
+    removeClock(id) {
+        if (this.alarmCollection.some((alarm) => alarm.id === id)) {
+            this.alarmCollection = this.alarmCollection.filter((alarm) => alarm.id !== id);
+            return true;
+        }
+        return false;
+    }
+    getCurrentFormattedTime() {
+        let currentTime = ("0" + new Date().getHours()).slice(-2) + ":"
+            + ("0" + new Date().getMinutes()).slice(-2);
+        return currentTime;
+    }
+    start() {
+        let checkClock = (alarm) => {
+            let time = this.getCurrentFormattedTime();
+            console.log(time);
+            if (alarm.time === time) {
+                alarm.callback();
+                return;
+            }
+        }
+        if (this.timerId === null) {
+            this.timerId = setInterval(() => this.alarmCollection.forEach(alarm => checkClock(alarm)), 1000);
+            console.log(this.timerId);
+        }
+        return;
+    }
+    stop() {
+        if (this.timerId !== null) {
+            this.timerId = null;
+            clearInterval(this.timerId);
+        }
+    }
+    printAlarms() {
+        console.log(`Печать всех будильников в количестве: ${this.alarmCollection.length}`);
+        this.alarmCollection.forEach(alarm => {
+            console.log(`Будильник № ${alarm.id} заведен на ${alarm.time}`);
         });
     }
-
-    removeClock(time) {
-        const alarm = this.alarmCollection.find(alarm => alarm.time === time);
-        if (!alarm) {
-            return null;
-        }
-        this.alarmCollection = this.alarmCollection.filter(alarm => alarm.time !== time);
-        return alarm;
-    }
-
-    getCurrentFormattedTime() {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-    }
-
-    start() {
-        if (this.intervalId !== null) {
-            console.warn('Будильник уже работает');
-            return;
-        }
-        const checkAlarms = () => {
-            this.alarmCollection.forEach(alarm => {
-                if (alarm.time === this.getCurrentFormattedTime() && alarm.canCall) {
-                    alarm.callback();
-                    alarm.canCall = false;
-                } else if (alarm.time !== this.getCurrentFormattedTime()) {
-                    alarm.canCall = true;
-                }
-            });
-        };
-        checkAlarms();
-        this.intervalId = setInterval(checkAlarms, 1000);
-    }
-
-    stop() {
-        clearInterval(this.intervalId);
-        this.intervalId = null;
-        this.clearAlarms(); // очищаем все звонки
-    }
-
-    resetAllCalls() {
-        this.alarmCollection.forEach(alarm => alarm.canCall = true);
-    }
-
     clearAlarms() {
-        clearInterval(this.intervalId);
-        this.intervalId = null;
+        this.stop();
         this.alarmCollection = [];
     }
 }
+
+// Пример использования *AlarmClock*
+
+function testCase() {
+    let alarmClock = new AlarmClock;
+    let currentTime = alarmClock.getCurrentFormattedTime();
+    let currentTimePlusOneMinute = currentTime.split(":")[0] +
+        ":" + ("0" + (Number.parseInt(currentTime.split(":")[1]) + 1)).slice(-2);  /* Не стал уж проверять, больше ли количество минут, чем 60 */
+    let currentTimePlusTwoMinute = currentTime.split(":")[0] +
+        ":" + ("0" + (Number.parseInt(currentTime.split(":")[1]) + 2)).slice(-2);
+
+    alarmClock.addClock(currentTime, () => {
+        console.log("Подъем!");
+        console.log("Подъем!!");
+        console.log("Подъем!!!");
+    }, 1);
+
+    alarmClock.addClock(currentTimePlusOneMinute, () => {
+        console.log("Серьезно, пора вставать!");
+        alarmClock.removeClock(2)
+    }, 2);
+
+    alarmClock.addClock(currentTimePlusTwoMinute, () => {
+        console.log("ВСТАВАААААЙ!!!");
+        alarmClock.stop();
+        alarmClock.clearAlarms();
+        alarmClock.printAlarms();
+    }, 3);
+
+    alarmClock.start();
+    alarmClock.stop();
+    alarmClock.printAlarms();
+
+}
+testCase();
